@@ -2,7 +2,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prem Journal – Spartan Trading Journal</title>
+<title>Spartan Trading Journal</title>
 <!-- Tailwind CSS CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- Firebase -->
@@ -36,7 +36,7 @@ await addDoc(collection(db,'trades'),{
 alert('Trade added!');
 document.getElementById('trade-form').reset();
 
-}
+
 
 // Fetch leaderboard (top 5) window.loadLeaderboard = async () => { const leaderboardDiv = document.getElementById('leaderboard'); leaderboardDiv.innerHTML = ''; const q = query(collection(db,'leaderboard'), orderBy('netR','desc'), limit(5)); const snapshot = await getDocs(q); snapshot.forEach(doc => { const data = doc.data(); const div = document.createElement('div'); div.textContent = '${data.name} - Rank: ${data.rank} - NetR: ${data.netR}'; leaderboardDiv.appendChild(div); }); } </script>
 
@@ -81,3 +81,4 @@ document.getElementById('trade-form').reset();
 </body>
 
 </html>
+
