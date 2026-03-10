@@ -16,14 +16,18 @@ const app = initializeApp(firebaseConfig); const auth = getAuth(app); const prov
 
 // Auth state listener onAuthStateChanged(auth, user => { if(user){ document.getElementById('login-section').classList.add('hidden'); document.getElementById('dashboard-section').classList.remove('hidden'); document.getElementById('user-name').textContent = user.displayName; } else { document.getElementById('login-section').classList.remove('hidden'); document.getElementById('dashboard-section').classList.add('hidden'); } });
 
-window.login = function () {
-  signInWithPopup(auth, provider)
-    .then(() => {
-      console.log("Login success");
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+window.login = async function () {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    document.getElementById('login-section').classList.add('hidden');
+    document.getElementById('dashboard-section').classList.remove('hidden');
+    document.getElementById('user-name').textContent = user.displayName;
+
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 window.logout = () => { signOut(auth); }
@@ -81,4 +85,5 @@ document.getElementById('trade-form').reset();
 </body>
 
 </html>
+
 
