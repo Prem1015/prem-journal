@@ -1,0 +1,74 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prem Journal – Spartan Trading Journal</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js';
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js';
+  import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js';
+  import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.1.0/firebase-storage.js';const firebaseConfig = { apiKey: "AIzaSyA5jIO477RYDtCmAW7a6jT2w-kKeWW0fQg", authDomain: "prem-journal.firebaseapp.com", projectId: "prem-journal", storageBucket: "prem-journal.firebasestorage.app", messagingSenderId: "194329113393", appId: "1:194329113393:web:c5dd8b001fd635742bf610" };
+
+const app = initializeApp(firebaseConfig); const auth = getAuth(app); const provider = new GoogleAuthProvider(); const db = getFirestore(app); const storage = getStorage(app);
+
+// Auth state listener onAuthStateChanged(auth, user => { if(user){ document.getElementById('login-section').classList.add('hidden'); document.getElementById('dashboard-section').classList.remove('hidden'); document.getElementById('user-name').textContent = user.displayName; } else { document.getElementById('login-section').classList.remove('hidden'); document.getElementById('dashboard-section').classList.add('hidden'); } });
+
+window.login = () => { signInWithPopup(auth, provider).catch(console.error); }
+
+window.logout = () => { signOut(auth); }
+
+// Add Trade window.addTrade = async () => { const pair = document.getElementById('trade-pair').value; const type = document.getElementById('trade-type').value; const entry = parseFloat(document.getElementById('trade-entry').value); const sl = parseFloat(document.getElementById('trade-sl').value); const exit = parseFloat(document.getElementById('trade-exit').value); const notes = document.getElementById('trade-notes').value; const r = type==='buy'? (exit-entry)/(entry-sl) : (entry-exit)/(sl-entry);
+
+await addDoc(collection(db,'trades'),{
+  pair, type, entry, sl, exit, r, notes, userID: auth.currentUser.uid, createdAt: serverTimestamp()
+});
+alert('Trade added!');
+document.getElementById('trade-form').reset();
+
+}
+
+// Fetch leaderboard (top 5) window.loadLeaderboard = async () => { const leaderboardDiv = document.getElementById('leaderboard'); leaderboardDiv.innerHTML = ''; const q = query(collection(db,'leaderboard'), orderBy('netR','desc'), limit(5)); const snapshot = await getDocs(q); snapshot.forEach(doc => { const data = doc.data(); const div = document.createElement('div'); div.textContent = ${data.name} - Rank: ${data.rank} - NetR: ${data.netR}; leaderboardDiv.appendChild(div); }); } </script>
+
+</head>
+<body class="bg-black text-white">
+  <!-- Login Section -->
+  <div id="login-section" class="flex flex-col items-center justify-center h-screen">
+    <h1 class="text-3xl font-bold mb-4">Prem Journal – Spartan Trading Journal</h1>
+    <button onclick="login()" class="bg-white text-black px-6 py-3 rounded-lg">Login with Google</button>
+  </div>  <!-- Dashboard Section -->  <div id="dashboard-section" class="hidden p-4">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-bold">Welcome, <span id="user-name"></span></h2>
+      <button onclick="logout()" class="bg-red-600 px-4 py-2 rounded">Logout</button>
+    </div><!-- Trade Add Panel -->
+<form id="trade-form" class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-2">
+  <input id="trade-pair" placeholder="Pair" class="p-2 rounded bg-gray-800" required>
+<select id="trade-type" class="p-2 rounded bg-gray-800" required>
+    <option value="buy">Buy</option>
+    <option value="sell">Sell</option>
+  </select>
+  <input id="trade-entry" type="number" step="0.01" placeholder="Entry" class="p-2 rounded bg-gray-800" required>
+  <input id="trade-sl" type="number" step="0.01" placeholder="SL" class="p-2 rounded bg-gray-800" required>
+  <input id="trade-exit" type="number" step="0.01" placeholder="Exit" class="p-2 rounded bg-gray-800" required>
+  <input id="trade-notes" placeholder="Notes" class="p-2 rounded bg-gray-800">
+  <button type="button" onclick="addTrade()" class="bg-green-600 px-4 py-2 rounded col-span-1 md:col-span-2">Add Trade</button>
+</form>
+
+<!-- Leaderboard Section -->
+<div class="mb-4">
+  <h3 class="text-xl font-bold mb-2">Weekly Leaderboard (Top 5)</h3>
+  <div id="leaderboard" class="p-2 bg-gray-900 rounded"></div>
+  <button onclick="loadLeaderboard()" class="mt-2 bg-blue-600 px-3 py-1 rounded">Refresh Leaderboard</button>
+</div>
+
+<!-- Performance Viewer (Placeholder) -->
+<div class="p-4 bg-gray-900 rounded">
+  <h3 class="text-xl font-bold mb-2">Performance Viewer</h3>
+  <p>Net R, Win Rate, Total Trades, Charts will display here.</p>
+</div>
+
+  </div>
+</body>
+</html>
